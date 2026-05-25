@@ -1,4 +1,4 @@
-# Whispa (formerly Anonym)
+# Whispa 
 
 Whispa is a secure, anonymous messaging application. It consists of a Java Spring Boot backend and a responsive Flutter frontend.
 
