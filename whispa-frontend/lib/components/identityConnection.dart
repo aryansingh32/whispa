@@ -133,111 +133,19 @@ class _IdentityConnectionState extends State<IdentityConnection> {
           }
         }
       } else {
-        // ❌ No key - need to exchange
-        print('⚠️ No public key for $peerCode - key exchange required');
+        // ❌ No key - but connecting directly as requested
+        print('⚠️ No public key for $peerCode - connecting directly anyway');
+        
+        await provider.ensureChatExists(peerCode);
         
         if (mounted) {
-          // Show key exchange dialog
-          final shouldExchange = await showDialog<bool>(
-            context: context,
-            builder: (context) => AlertDialog(
-              backgroundColor: const Color.fromRGBO(39, 39, 42, 1),
-              title: const Row(
-                children: [
-                  Icon(Icons.key, color: Color.fromRGBO(32, 211, 102, 1)),
-                  SizedBox(width: 8),
-                  Text(
-                    'Key Exchange Required',
-                    style: TextStyle(color: Colors.white, fontSize: 18),
-                  ),
-                ],
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'To connect with $peerCode, you need to exchange encryption keys first.',
-                    style: const TextStyle(
-                      color: Color.fromRGBO(161, 161, 170, 1),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: const Color.fromRGBO(32, 211, 102, 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: const Color.fromRGBO(32, 211, 102, 0.3),
-                      ),
-                    ),
-                    child: const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '🔐 Secure Key Exchange:',
-                          style: TextStyle(
-                            color: Color.fromRGBO(32, 211, 102, 1),
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          '1. Meet in person or video call\n'
-                          '2. Scan each other\'s QR codes\n'
-                          '3. Keys exchanged securely',
-                          style: TextStyle(
-                            color: Color.fromRGBO(161, 161, 170, 1),
-                            fontSize: 12,
-                            height: 1.5,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: const Text('Cancel'),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () => Navigator.pop(context, true),
-                  icon: const Icon(Icons.qr_code_scanner, size: 18),
-                  label: const Text('Exchange Keys'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromRGBO(32, 211, 102, 1),
-                  ),
-                ),
-              ],
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('✅ Connected to $peerCode'),
+              backgroundColor: const Color.fromRGBO(32, 211, 102, 1),
             ),
           );
-
-          if (shouldExchange == true && mounted) {
-            // Navigate to key exchange screen
-            final result = await Navigator.push<bool>(
-              context,
-              MaterialPageRoute(
-                builder: (context) => KeyExchangeScreen.forPeer(
-                  peerCode: peerCode,
-                ),
-              ),
-            );
-
-            if (result == true && mounted) {
-              // Keys exchanged successfully
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('✅ Keys exchanged! You can now chat securely'),
-                  backgroundColor: Color.fromRGBO(32, 211, 102, 1),
-                ),
-              );
-              _peerCodeController.clear();
-            }
-          }
+          _peerCodeController.clear();
         }
       }
     } catch (e) {
