@@ -150,8 +150,33 @@ class BackendService {
   Future<void> _handleIncomingMessage(Map<String, dynamic> messageData) async {
     try {
       print('📨 Received message from ${messageData['sender']}');
+      final sender = messageData['sender'] as String;
+
+      // 1. Intercept Public Key Share
+      if (messageData.containsKey('publicKey') && messageData['publicKey'] != null) {
+        final publicKey = messageData['publicKey'] as String;
+        await storePeerPublicKey(sender, publicKey);
+        print('✅ Automatically received and stored public key from $sender');
+        
+        // Notify app state that we got the key
+        messageData['isKeyShare'] = true;
+        onMessageReceived?.call(messageData);
+        return;
+      }
+
+      // 2. Intercept Key Exchange Request
+      if (!messageData.containsKey('encryptedContent') && !messageData.containsKey('content')) {
+        print('🔄 Received key exchange request from $sender');
+        final myKey = await getPublicKey();
+        if (myKey != null) {
+          // Send our key back automatically!
+          sharePublicKey(sender, myKey);
+          print('✅ Automatically sent our public key back to $sender');
+        }
+        return; // Handled silently, don't forward to UI
+      }
       
-      // Decrypt message
+      // Decrypt normal message
       final decryptedContent = await _encryptionService.decryptMessage(messageData);
       
       // Add decrypted content to message data
@@ -235,6 +260,24 @@ class BackendService {
   Future<bool> hasPeerPublicKey(String peerCode) async {
     final key = await getPeerPublicKey(peerCode);
     return key != null;
+  }
+
+  /// ✅ NEW: Request public key from peer over STOMP
+  void requestKeyExchange(String peerCode) {
+    if (_isConnected) {
+      _webSocketService.requestKeyExchange(peerCode);
+      print('📡 Requested public key from $peerCode');
+    }
+  }
+
+  /// ✅ NEW: Share our public key with peer over STOMP
+  void sharePublicKey(String peerCode, String publicKey) {
+    if (_isConnected) {
+      _webSocketService.sharePublicKey(
+        receiver: peerCode, 
+        publicKey: publicKey,
+      );
+    }
   }
 
   // ============ Session Management ============

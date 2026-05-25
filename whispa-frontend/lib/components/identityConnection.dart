@@ -138,6 +138,9 @@ class _IdentityConnectionState extends State<IdentityConnection> {
         
         await provider.ensureChatExists(peerCode);
         
+        // 🚀 Automatically ping peer for their public key in background
+        provider.requestKeyExchange(peerCode);
+        
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

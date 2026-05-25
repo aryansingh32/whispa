@@ -244,10 +244,25 @@ class AppStateProvider extends ChangeNotifier {
     };
   }
 
-  /// ✅ Handle incoming message
+  /// ✅ Handle incoming message (and Key Share intercepts)
   void _handleIncomingMessage(Map<String, dynamic> messageData) {
     try {
       final sender = messageData['sender'] as String;
+      
+      // ✅ Handle Background Key Share
+      if (messageData['isKeyShare'] == true) {
+        if (_chats.containsKey(sender)) {
+          _chats[sender]!.hasPublicKey = true;
+          // Save to local storage if persistence enabled
+          if (_enablePersistence) {
+            _saveChat(_chats[sender]!);
+          }
+          notifyListeners();
+          print('✅ UI State Updated: Peer $sender is now fully secured');
+        }
+        return; // It's just a key share, not a real message
+      }
+
       final timestamp = messageData['timestamp'] as String?;
       final decryptedContent = messageData['decryptedContent'] as String?;
 
@@ -440,6 +455,13 @@ class AppStateProvider extends ChangeNotifier {
   Future<bool> hasPeerPublicKey(String peerCode) async {
     if (_backendService == null) return false;
     return await _backendService!.hasPeerPublicKey(peerCode);
+  }
+
+  /// ✅ Request key exchange from peer automatically
+  void requestKeyExchange(String peerCode) {
+    if (_backendService != null) {
+      _backendService!.requestKeyExchange(peerCode);
+    }
   }
 
   /// ✅ Get specific chat
