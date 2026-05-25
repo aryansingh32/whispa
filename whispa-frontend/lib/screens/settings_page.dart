@@ -169,7 +169,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                     SizedBox(height: 4),
                     Text(
-                      'Configure your Anonym experience',
+                      'Configure your Whispa experience',
                       style: TextStyle(
                         color: Color.fromRGBO(161, 161, 170, 1),
                         fontSize: 14,

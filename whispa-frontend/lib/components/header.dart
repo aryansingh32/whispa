@@ -18,7 +18,7 @@ class Header extends StatelessWidget {
         ),
         // SizedBox(width:8),
         Text(
-          "ANONYM",
+          "WHISPA",
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,

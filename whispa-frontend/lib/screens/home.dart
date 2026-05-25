@@ -100,7 +100,7 @@ class _HomeState extends State<Home> {
                 
                 // Title
                 const Text(
-                  'Initializing Anonym',
+                  'Initializing Whispa',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 20,
@@ -341,7 +341,7 @@ class _HomeState extends State<Home> {
                   const SizedBox(height: 20),
                   
                   const Text(
-                    'Initializing Anonym...',
+                    'Initializing Whispa...',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
