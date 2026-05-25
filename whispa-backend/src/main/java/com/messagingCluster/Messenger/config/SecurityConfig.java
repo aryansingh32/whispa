@@ -8,6 +8,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 
 /**
  * HTTP Security Configuration for ANonym Backend
@@ -34,11 +36,17 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                // Enable CORS to allow preflight OPTIONS requests
+                .cors(Customizer.withDefaults())
+                
                 // Disable CSRF: We're using stateless auth with custom tokens
                 .csrf(csrf -> csrf.disable())
 
                 // Configure authorization rules
                 .authorizeHttpRequests(auth -> auth
+                        // Allow all OPTIONS requests (CORS Preflight)
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                         // PUBLIC ENDPOINTS
 
                         // 1. WebSocket handshake endpoint (auth happens in WS layer)
