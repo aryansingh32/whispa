@@ -66,7 +66,20 @@ class _IdentityConnectionState extends State<IdentityConnection> {
 
   /// ✅ FIXED: Connect to peer - direct connection if key exists
   Future<void> _connectToPeer(BuildContext context) async {
-    final peerCode = _peerCodeController.text.trim().toUpperCase();
+    String peerCode = _peerCodeController.text.trim().toUpperCase();
+    
+    // Auto-format: remove existing hyphens/spaces, insert hyphens every 4 chars
+    final cleanCode = peerCode.replaceAll('-', '').replaceAll(' ', '');
+    if (cleanCode.isNotEmpty) {
+      final buffer = StringBuffer();
+      for (int i = 0; i < cleanCode.length; i++) {
+        if (i > 0 && i % 4 == 0) {
+          buffer.write('-');
+        }
+        buffer.write(cleanCode[i]);
+      }
+      peerCode = buffer.toString();
+    }
 
     // Validate input
     if (peerCode.isEmpty) {
