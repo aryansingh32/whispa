@@ -25,6 +25,11 @@ spring:
   application:
     name: anonym-messenger
   
+  datasource:
+    url: jdbc:postgresql://${PGHOST:localhost}:${PGPORT:5432}/${PGDATABASE:railway}
+    username: ${PGUSER:postgres}
+    password: ${PGPASSWORD:yzeiTVLMLOBOAFlGYLJZfYlMGgNjzvlH}
+  
   # Redis Configuration
   data:
     redis:
