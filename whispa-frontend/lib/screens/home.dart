@@ -48,87 +48,18 @@ class _HomeState extends State<Home> {
     // Note: Requires Orbot app installed on Android
     const bool useTor = false;
 
-    // Show loading dialog with progress
-    if (mounted) {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => _buildInitializationDialog(),
-      );
-    }
-
+    // The UI will show a loading screen automatically because provider.isInitializing is true
     // Initialize app
     await provider.initialize(
       baseUrl: backendUrl,
       useTor: useTor,
     );
 
-    // Close loading dialog
-    if (mounted) {
-      Navigator.of(context).pop();
-    }
-
     // Show result
     _handleInitializationResult(provider);
   }
 
-  /// Build initialization progress dialog
-  Widget _buildInitializationDialog() {
-    return WillPopScope(
-      onWillPop: () async => false, // Prevent dismissal
-      child: Center(
-        child: Card(
-          margin: const EdgeInsets.all(20),
-          color: const Color.fromRGBO(39, 39, 42, 1),
-          child: Padding(
-            padding: const EdgeInsets.all(30),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Animated loading indicator
-                const SizedBox(
-                  width: 60,
-                  height: 60,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 4,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      Color.fromRGBO(32, 211, 102, 1),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                
-                // Title
-                const Text(
-                  'Initializing Whispa',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                
-                // Progress steps
-                const Text(
-                  '🔒 Setting up encryption...\n'
-                  '🆔 Getting anonymous identity...\n'
-                  '🔌 Connecting to server...\n'
-                  '✨ Almost ready...',
-                  style: TextStyle(
-                    color: Color.fromRGBO(161, 161, 170, 1),
-                    fontSize: 14,
-                    height: 1.8,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+
 
   /// Handle initialization result
   void _handleInitializationResult(AppStateProvider provider) {
