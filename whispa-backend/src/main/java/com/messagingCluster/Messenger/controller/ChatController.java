@@ -71,7 +71,7 @@ public class ChatController {
             MessageModel errorMsg = new MessageModel();
             errorMsg.setSender("SYSTEM");
             errorMsg.setReceiver(authenticatedSender);
-            errorMsg.setEncryptedContent("ERROR: Recipient not found or session expired");
+            errorMsg.setContent("ERROR: Recipient not found or session expired");
             errorMsg.setTimestamp(LocalDateTime.now());
 
             messagingTemplate.convertAndSend(
@@ -99,7 +99,7 @@ public class ChatController {
             MessageModel errorMsg = new MessageModel();
             errorMsg.setSender("SYSTEM");
             errorMsg.setReceiver(authenticatedSender);
-            errorMsg.setEncryptedContent("ERROR: Rate limit exceeded. Please slow down.");
+            errorMsg.setContent("ERROR: Rate limit exceeded. Please slow down.");
             errorMsg.setTimestamp(LocalDateTime.now());
             
             messagingTemplate.convertAndSend(
