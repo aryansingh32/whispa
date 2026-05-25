@@ -1,10 +1,48 @@
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:pointycastle/export.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
+
+/// 🚀 BACKGROUND ISOLATE FUNCTION: Generates RSA Keys without blocking UI
+Map<String, String> _generateKeyPairInBackground(void _) {
+  final secureRandom = SecureRandom('Fortuna');
+  final random = Random.secure();
+  final seeds = List<int>.generate(32, (_) => random.nextInt(256));
+  secureRandom.seed(KeyParameter(Uint8List.fromList(seeds)));
+  
+  final keyGen = RSAKeyGenerator()
+    ..init(
+      ParametersWithRandom(
+        RSAKeyGeneratorParameters(BigInt.parse('65537'), 2048, 64),
+        secureRandom,
+      ),
+    );
+
+  final pair = keyGen.generateKeyPair();
+  final publicKey = pair.publicKey as RSAPublicKey;
+  final privateKey = pair.privateKey as RSAPrivateKey;
+
+  final pubEncoded = json.encode({
+    'modulus': publicKey.modulus.toString(),
+    'exponent': publicKey.exponent.toString(),
+  });
+
+  final privEncoded = json.encode({
+    'modulus': privateKey.modulus.toString(),
+    'privateExponent': privateKey.privateExponent.toString(),
+    'p': privateKey.p.toString(),
+    'q': privateKey.q.toString(),
+  });
+
+  return {
+    'publicKey': pubEncoded,
+    'privateKey': privEncoded,
+  };
+}
 
 /// ✅ FIXED: Hybrid Encryption Service with Better Error Handling
 /// Handles both encrypted and unencrypted messages gracefully
@@ -17,9 +55,9 @@ class HybridEncryptionService {
   final Map<String, _SessionKey> _sessionKeys = {};
   final Duration sessionKeyLifetime = const Duration(hours: 1);
 
-  /// Generate RSA key pair
+  /// Generate RSA key pair (Offloaded to Web Worker / Isolate)
   Future<void> generateKeyPair() async {
-    print('🔐 Generating RSA key pair...');
+    print('🔐 Generating RSA key pair in background worker...');
     
     final existingPublicKey = await _secureStorage.read(key: _publicKeyStorageKey);
     if (existingPublicKey != null) {
@@ -27,28 +65,19 @@ class HybridEncryptionService {
       return;
     }
     
-    final keyGen = RSAKeyGenerator()
-      ..init(
-        ParametersWithRandom(
-          RSAKeyGeneratorParameters(BigInt.parse('65537'), 2048, 64),
-          _getSecureRandom(),
-        ),
-      );
-
-    final pair = keyGen.generateKeyPair();
-    final publicKey = pair.publicKey as RSAPublicKey;
-    final privateKey = pair.privateKey as RSAPrivateKey;
+    // 🔥 Offload heavy encryption math to a background thread!
+    final keys = await compute(_generateKeyPairInBackground, null);
 
     await _secureStorage.write(
       key: _publicKeyStorageKey,
-      value: _encodePublicKey(publicKey),
+      value: keys['publicKey'],
     );
     await _secureStorage.write(
       key: _privateKeyStorageKey,
-      value: _encodePrivateKey(privateKey),
+      value: keys['privateKey'],
     );
     
-    print('✅ RSA key pair generated');
+    print('✅ RSA key pair generated smoothly');
   }
 
   /// Get or create session key for a peer
