@@ -42,7 +42,7 @@ class _HomeState extends State<Home> {
     // - iOS simulator: 'http://localhost:8080'
     // - Real device on same network: 'http://192.168.x.x:8080'
     // For production: 'https://your-server.com'
-    const String backendUrl = 'http://192.168.1.20:8080';
+    const String backendUrl = 'https://whispa-production-4d07.up.railway.app';
     
     // TODO: Set to true to enable Tor routing
     // Note: Requires Orbot app installed on Android
